@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050816;
+  --foreground: #f8fafc;
+  --primary: #477cff;
+  --secondary: #a78bfa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: #477cff;
+  color: white;
+}
+
+.glass {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  backdrop-filter: blur(24px);
+}
+
+.gradient-text {
+  background: linear-gradient(110deg, #38bdf8, #477cff, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow-blue {
+  box-shadow: 0 0 65px rgba(71, 124, 255, 0.16);
+}
+
+.bg-grid {
+  background-image:
+          linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
+  background-size: 55px 55px;
+}
+
+.ticket-edge::before,
+.ticket-edge::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  height: 12px;
+  content: "";
+  background-image: radial-gradient(circle at 10px 0, transparent 9px, #f6f1e6 9.5px);
+  background-size: 20px 12px;
+}
+
+.ticket-edge::before {
+  top: 0;
+}
+
+.ticket-edge::after {
+  bottom: 0;
+  transform: rotate(180deg);
+}
