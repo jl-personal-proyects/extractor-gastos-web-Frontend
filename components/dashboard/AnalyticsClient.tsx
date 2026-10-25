@@ -6,7 +6,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Res
 import { ArrowDownRight, ArrowUpRight, CalendarDays, ReceiptText, TrendingUp, WalletCards } from "lucide-react";
 import { moneda } from "@/components/dashboard/TransactionTicket";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api/backend";
 const coloresGasto = ["#60a5fa", "#34d399", "#c084fc", "#fbbf24", "#fb7185", "#94a3b8"];
 const coloresConsumo = ["#38bdf8", "#a78bfa", "#2dd4bf", "#fb923c", "#f472b6", "#94a3b8"];
 

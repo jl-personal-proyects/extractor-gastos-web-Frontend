@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Database, Download, FolderSync, Landmark, Plus, RefreshCw, Tags } from "lucide-react";
 import { toast } from "sonner";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api/backend";
 const predeterminadas = ["Alimentación", "Transporte", "Transferencias", "Entretenimiento", "Salud", "Servicios", "Otros"];
 const fechaLocal = new Date();
 const mesActual = `${fechaLocal.getFullYear()}-${String(fechaLocal.getMonth() + 1).padStart(2, "0")}`;

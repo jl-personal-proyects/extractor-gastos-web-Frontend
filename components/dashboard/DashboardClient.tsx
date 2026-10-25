@@ -17,7 +17,7 @@ type Analiticas = {
 type Sincronizacion = { modo: string; correos_escaneados: number; gastos_nuevos_guardados: number };
 type AlertaPresupuesto = { categoria: string; limite_mensual: number | string; gasto_actual: number | string; porcentaje_consumido: number | string };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api/backend";
 
 function numero(valor: number | string) {
     const resultado = Number(valor);

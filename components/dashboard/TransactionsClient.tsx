@@ -12,7 +12,7 @@ type ResultadoPaginado = {
 };
 
 type Filtros = { fechaDesde: string; fechaHasta: string; categoria: string; comercio: string; banco: string; tipoMovimiento: string; incluirPropias: boolean };
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = "/api/backend";
 const filtrosIniciales: Filtros = { fechaDesde: "", fechaHasta: "", categoria: "", comercio: "", banco: "", tipoMovimiento: "", incluirPropias: false };
 const categorias = ["Alimentación", "Transporte", "Transferencias", "Entretenimiento", "Salud", "Servicios", "Otros"];
 
