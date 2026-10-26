@@ -9,7 +9,7 @@ const predeterminadas = ["Alimentación", "Transporte", "Transferencias", "Entre
 const fechaLocal = new Date();
 const mesActual = `${fechaLocal.getFullYear()}-${String(fechaLocal.getMonth() + 1).padStart(2, "0")}`;
 
-type Sincronizacion = { correos_escaneados: number; gastos_nuevos_guardados: number };
+type Sincronizacion = { correos_escaneados: number; gastos_nuevos_guardados: number; gastos_reparados?: number };
 type Cuenta = { id: number; alias: string; identificador: string };
 type Presupuesto = { categoria: string; limite_mensual: string; mes_anio: string };
 type CategoriaPersonalizada = { id: number; nombre: string };
@@ -64,7 +64,8 @@ export default function SettingsPage() {
         setIsResyncing(true); setResultado(null);
         try {
             const sincronizacion = await respuestaJson<Sincronizacion>(API_URL + "/sincronizar/reconstruir", { method: "POST" });
-            const mensaje = sincronizacion.correos_escaneados + " correos revisados; " + sincronizacion.gastos_nuevos_guardados + " movimientos nuevos.";
+            const reparados = sincronizacion.gastos_reparados ? "; " + sincronizacion.gastos_reparados + " comprobantes reparados" : "";
+            const mensaje = sincronizacion.correos_escaneados + " correos revisados; " + sincronizacion.gastos_nuevos_guardados + " movimientos nuevos" + reparados + ".";
             setResultado(mensaje); toast.success("Recuperación terminada", { description: mensaje });
         } catch (error) { toast.error("No se pudo resincronizar", { description: error instanceof Error ? error.message : "Inténtalo otra vez." }); }
         finally { setIsResyncing(false); }

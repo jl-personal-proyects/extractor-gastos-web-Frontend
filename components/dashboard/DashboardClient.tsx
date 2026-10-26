@@ -14,7 +14,7 @@ type Analiticas = {
     comercios_recurrentes: { establecimiento: string; transacciones: number; total: number | string }[];
 };
 
-type Sincronizacion = { modo: string; correos_escaneados: number; gastos_nuevos_guardados: number };
+type Sincronizacion = { modo: string; correos_escaneados: number; gastos_nuevos_guardados: number; gastos_reparados?: number };
 type AlertaPresupuesto = { categoria: string; limite_mensual: number | string; gasto_actual: number | string; porcentaje_consumido: number | string };
 
 const API_URL = "/api/backend";
@@ -100,7 +100,8 @@ export default function DashboardClient({ userName }: { userName: string }) {
                 throw new Error(detalle);
             }
             const sincronizacion = data as Sincronizacion;
-            setMensajeSync(`Sincronización ${sincronizacion.modo}: ${sincronizacion.gastos_nuevos_guardados} gasto(s) nuevo(s) de ${sincronizacion.correos_escaneados} correo(s) revisados.`);
+            const reparados = sincronizacion.gastos_reparados ? `; ${sincronizacion.gastos_reparados} comprobante(s) reparado(s)` : "";
+            setMensajeSync(`Sincronización ${sincronizacion.modo}: ${sincronizacion.gastos_nuevos_guardados} gasto(s) nuevo(s) de ${sincronizacion.correos_escaneados} correo(s) revisados${reparados}.`);
             await cargarAnaliticas();
         } catch (caughtError) {
             setError(caughtError instanceof Error ? caughtError.message : "No se pudo sincronizar Gmail.");
