@@ -15,6 +15,20 @@ type Filtros = { fechaDesde: string; fechaHasta: string; categoria: string; come
 const API_URL = "/api/backend";
 const filtrosIniciales: Filtros = { fechaDesde: "", fechaHasta: "", categoria: "", comercio: "", banco: "", tipoMovimiento: "", incluirPropias: false };
 const categorias = ["Alimentación", "Transporte", "Transferencias", "Entretenimiento", "Salud", "Servicios", "Otros"];
+const origenes = [
+    { banco: "", titulo: "Todos", detalle: "Todos los comprobantes", tono: "border-white/15 bg-white/[0.06] text-white", punto: "bg-slate-300" },
+    { banco: "BCP", titulo: "BCP", detalle: "Banca Móvil y tarjetas", tono: "border-blue-400/35 bg-blue-500/10 text-blue-100", punto: "bg-orange-400" },
+    { banco: "INTERBANK", titulo: "Interbank", detalle: "Pagos y tarjetas", tono: "border-emerald-400/35 bg-emerald-500/10 text-emerald-100", punto: "bg-emerald-400" },
+    { banco: "YAPE", titulo: "Yape", detalle: "Yapeos enviados", tono: "border-violet-400/35 bg-violet-500/10 text-violet-100", punto: "bg-violet-400" },
+] as const;
+
+function origenDe(banco?: string | null) {
+    const nombre = banco?.toUpperCase() || "OTROS";
+    if (nombre === "BCP") return { clave: "BCP", titulo: "BCP", detalle: "Comprobantes BCP", punto: "bg-orange-400", borde: "border-blue-400/20" };
+    if (nombre === "INTERBANK") return { clave: "INTERBANK", titulo: "Interbank", detalle: "Comprobantes Interbank", punto: "bg-emerald-400", borde: "border-emerald-400/20" };
+    if (nombre === "YAPE") return { clave: "YAPE", titulo: "Yape", detalle: "Movimientos Yape", punto: "bg-violet-400", borde: "border-violet-400/20" };
+    return { clave: nombre, titulo: banco || "Otros", detalle: "Otros orígenes", punto: "bg-slate-400", borde: "border-slate-400/20" };
+}
 
 // Función auxiliar para los colores de las entidades bancarias
 function estiloBanco(banco?: string | null, tipoMovimiento?: string | null) {
@@ -91,14 +105,33 @@ export default function TransactionsClient() {
         setPagina(1);
     }
 
+    function seleccionarOrigen(banco: string) {
+        const siguientes = { ...filtrosIniciales, banco };
+        setBorrador(siguientes);
+        setFiltros(siguientes);
+        setPagina(1);
+    }
+
     const items = resultado?.items ?? [];
     const paginacion = resultado?.pagination;
+    const gruposPorOrigen = items.reduce<{ origen: ReturnType<typeof origenDe>; gastos: Gasto[] }[]>((grupos, gasto) => {
+        const origen = origenDe(gasto.banco);
+        const grupo = grupos.find((actual) => actual.origen.clave === origen.clave);
+        if (grupo) grupo.gastos.push(gasto);
+        else grupos.push({ origen, gastos: [gasto] });
+        return grupos;
+    }, []).sort((a, b) => {
+        const orden = ["BCP", "INTERBANK", "YAPE"];
+        return (orden.indexOf(a.origen.clave) + 1 || 99) - (orden.indexOf(b.origen.clave) + 1 || 99);
+    });
 
     return (
         <main className="relative min-h-full overflow-hidden bg-transparent p-6 text-white md:p-9">
             <div className="absolute -top-[10%] right-[-10%] h-[500px] w-[500px] rounded-full bg-violet-600/10 blur-[120px]" />
             <div className="relative z-10 mx-auto max-w-6xl">
                 <header className="mb-9 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-blue-300 hover:text-blue-200"><ArrowLeft className="h-4 w-4" /> Panel de gastos</Link><p className="mt-5 text-sm text-slate-400">Historial completo</p><h1 className="mt-1 text-4xl font-extrabold">Últimas transacciones</h1></div><p className="text-sm text-slate-500">{paginacion ? `${paginacion.total} movimientos encontrados` : "Cargando…"}</p></header>
+
+                <section aria-label="Filtrar por origen" className="mb-5 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-3 backdrop-blur-xl"><div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">{origenes.map((origen) => { const activo = filtros.banco === origen.banco; return <button key={origen.titulo} type="button" onClick={() => seleccionarOrigen(origen.banco)} className={`min-w-40 shrink-0 rounded-xl border px-3 py-3 text-left transition ${activo ? origen.tono : "border-transparent bg-black/15 text-slate-400 hover:bg-white/[0.06]"}`}><span className="flex items-center gap-2 text-sm font-bold"><i className={`h-2 w-2 rounded-full ${origen.punto}`} />{origen.titulo}</span><span className="mt-1 block text-[11px] opacity-75">{origen.detalle}</span></button>; })}</div></section>
 
                 <form onSubmit={aplicarFiltros} className="mb-8 grid gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1.5fr_auto_auto]">
                     <label className="text-xs text-slate-400">Desde<input type="date" value={borrador.fechaDesde} onChange={(event) => setBorrador({ ...borrador, fechaDesde: event.target.value })} className="mt-1 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-blue-400" /></label>
@@ -116,42 +149,7 @@ export default function TransactionsClient() {
                 {isLoading && <p className="text-slate-400">Cargando transacciones…</p>}
                 {!isLoading && !error && items.length === 0 && <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-10 text-center"><Receipt className="mx-auto mb-4 h-10 w-10 text-blue-400" /><h2 className="text-xl font-bold">No hay transacciones con estos filtros</h2><p className="mt-2 text-slate-400">Cambia la fecha, categoría o comercio para ampliar la búsqueda.</p></div>}
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {items.map((gasto) => (
-                        <motion.button
-                            key={gasto.id}
-                            type="button"
-                            onClick={() => setSeleccionado(gasto)}
-                            whileHover={{ y: -2 }}
-                            whileTap={{ scale: 0.99 }}
-                            className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 text-left shadow-xl backdrop-blur-xl transition hover:border-blue-300/30 hover:bg-white/[0.06]"
-                        >
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="min-w-0">
-                                    <p className="truncate font-bold">{gasto.establecimiento || "Establecimiento no identificado"}</p>
-                                    <p className="mt-1 text-sm text-slate-400">{gasto.tipo_operacion || "Consumo"}</p>
-                                </div>
-                                <p className="whitespace-nowrap text-xl font-bold text-emerald-300">
-                                    {moneda.format(montoNumerico(gasto.monto))}
-                                </p>
-                            </div>
-                            <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/[0.07] pt-3 text-xs">
-                                <div className="flex min-w-0 flex-wrap gap-2">
-                                    <span className="truncate rounded-full bg-blue-400/10 px-2.5 py-1 font-semibold text-blue-200">
-                                        {gasto.categoria_gasto || gasto.categoria || "Otros"}
-                                    </span>
-                                    <span className="truncate rounded-full bg-slate-400/10 px-2.5 py-1 font-semibold text-slate-300">
-                                        {gasto.categoria_consumo || "Consumo General"}
-                                    </span>
-                                    <span className={`rounded-full px-2.5 py-1 font-semibold ${estiloBanco(gasto.banco, gasto.tipo_movimiento)}`}>
-                                        {gasto.banco || "Banco"} · {gasto.tipo_movimiento || "PAGO"}
-                                    </span>
-                                </div>
-                                <span className="shrink-0 text-slate-500">{formatearFecha(gasto.fecha_transaccion)}</span>
-                            </div>
-                        </motion.button>
-                    ))}
-                </div>
+                <div className="space-y-8">{gruposPorOrigen.map(({ origen, gastos }) => <section key={origen.clave} className={`rounded-2xl border ${origen.borde} bg-black/10 p-3 sm:p-4`}><header className="mb-3 flex items-center justify-between gap-3 px-1"><div className="flex min-w-0 items-center gap-2"><i className={`h-2.5 w-2.5 shrink-0 rounded-full ${origen.punto}`} /><div className="min-w-0"><h2 className="font-bold text-white">{origen.titulo}</h2><p className="truncate text-xs text-slate-500">{origen.detalle}</p></div></div><span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs font-semibold text-slate-300">{gastos.length} en esta página</span></header><div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{gastos.map((gasto) => <motion.button key={gasto.id} type="button" onClick={() => setSeleccionado(gasto)} whileHover={{ y: -2 }} whileTap={{ scale: 0.99 }} className="rounded-xl border border-white/[0.08] bg-white/[0.035] p-4 text-left shadow-lg backdrop-blur-xl transition hover:border-blue-300/30 hover:bg-white/[0.06]"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold">{gasto.establecimiento || "Establecimiento no identificado"}</p><p className="mt-1 truncate text-sm text-slate-400">{gasto.tipo_operacion || "Consumo"}</p></div><p className="whitespace-nowrap text-lg font-bold text-emerald-300">{moneda.format(montoNumerico(gasto.monto))}</p></div><div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-3 text-xs"><span className="rounded-full bg-blue-400/10 px-2.5 py-1 font-semibold text-blue-200">{gasto.categoria_gasto || gasto.categoria || "Otros"}</span><span className="rounded-full bg-slate-400/10 px-2.5 py-1 font-semibold text-slate-300">{gasto.categoria_consumo || "Consumo General"}</span><span className={`rounded-full px-2.5 py-1 font-semibold ${estiloBanco(gasto.banco, gasto.tipo_movimiento)}`}>{gasto.tipo_movimiento || "PAGO"}</span><span className="ml-auto text-slate-500">{formatearFecha(gasto.fecha_transaccion)}</span></div></motion.button>)}</div></section>)}</div>
 
                 {paginacion && paginacion.total_pages > 1 && <nav className="mt-8 flex items-center justify-center gap-4"><button type="button" disabled={paginacion.page === 1} onClick={() => setPagina((actual) => Math.max(1, actual - 1))} className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm disabled:opacity-40"><ChevronLeft className="h-4 w-4" />Anterior</button><span className="text-sm text-slate-400">Página {paginacion.page} de {paginacion.total_pages}</span><button type="button" disabled={paginacion.page === paginacion.total_pages} onClick={() => setPagina((actual) => actual + 1)} className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm disabled:opacity-40">Siguiente<ChevronRight className="h-4 w-4" /></button></nav>}
             </div>
