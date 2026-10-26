@@ -24,6 +24,15 @@ function numero(valor: number | string) {
     return Number.isFinite(resultado) ? resultado : 0;
 }
 
+function formatearFechaDiaria(fecha: string | null | undefined) {
+    const coincidencia = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/.exec(fecha ?? "");
+    if (!coincidencia) return "Sin fecha";
+    const [, anio, mes, dia] = coincidencia;
+    const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
+    if (Number.isNaN(fechaLocal.getTime())) return "Sin fecha";
+    return new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "short" }).format(fechaLocal);
+}
+
 export default function DashboardClient({ userName }: { userName: string }) {
     const [analiticas, setAnaliticas] = useState<Analiticas | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -101,7 +110,7 @@ export default function DashboardClient({ userName }: { userName: string }) {
     }
 
     const serieDiaria: SerieDiaria[] = useMemo(() => (analiticas?.diario ?? []).map((dato) => ({
-        fecha: new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "short" }).format(new Date(`${dato.fecha}T12:00:00`)),
+        fecha: formatearFechaDiaria(dato.fecha),
         bcp: numero(dato.gastos_bcp),
         interbank: numero(dato.gastos_interbank),
         yape: numero(dato.yape),

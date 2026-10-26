@@ -35,10 +35,12 @@ export function montoNumerico(monto: Gasto["monto"]) {
 
 export function formatearFecha(fecha: string | null, incluirHora = true) {
     if (!fecha) return "Fecha no identificada";
+    const fechaConvertida = new Date(fecha);
+    if (Number.isNaN(fechaConvertida.getTime())) return "Fecha no identificada";
     return new Intl.DateTimeFormat("es-PE", {
         dateStyle: "medium",
         ...(incluirHora ? { timeStyle: "short" } : {}),
-    }).format(new Date(fecha));
+    }).format(fechaConvertida);
 }
 
 export function TransactionTicket({ gasto, onClose, onUpdated }: { gasto: Gasto; onClose: () => void; onUpdated: (gasto: Gasto) => void }) {
