@@ -17,6 +17,11 @@ export type Gasto = {
     categoria_consumo: string | null;
     es_modificacion_manual?: boolean;
     es_transferencia_propia?: boolean;
+    naturaleza_movimiento?: string | null;
+    estado_revision?: string | null;
+    gasto_excluido?: boolean;
+    movimiento_relacionado_id?: string | number | null;
+    confianza_extraccion?: number | string | null;
     banco: string | null;
     tipo_movimiento: string | null;
     fecha_transaccion: string | null;

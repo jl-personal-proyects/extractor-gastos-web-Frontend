@@ -1,5 +1,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Entornos
+
+El frontend usa `.env.local` durante el desarrollo y Vercel usa sus variables de entorno en producción. El proxy autenticado necesita `BACKEND_API_URL` y `BACKEND_INTERNAL_SECRET`; ninguno se expone al navegador.
+
+`NEXT_PUBLIC_API_URL` ya no es necesario: el navegador nunca llama a Render directamente.
+
+Para preparar una compilación de producción local, completa `.env.prod` y cópialo temporalmente como `.env.production.local`. No subas ninguno de estos archivos.
+
 ## Getting Started
 
 First, run the development server:

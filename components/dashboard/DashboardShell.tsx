@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, LayoutDashboard, LogOut, ReceiptText, Settings, WalletCards } from "lucide-react";
+import { BarChart3, ClipboardCheck, LayoutDashboard, LogOut, ReceiptText, Settings, ShieldCheck, WalletCards } from "lucide-react";
 import { signOut } from "next-auth/react";
 import type { ReactNode } from "react";
 
@@ -10,7 +10,9 @@ const navigation = [
     { href: "/dashboard", label: "Resumen", icon: LayoutDashboard, exact: true },
     { href: "/dashboard/transactions", label: "Movimientos", icon: ReceiptText },
     { href: "/dashboard/analytics", label: "Análisis", icon: BarChart3 },
+    { href: "/dashboard/review", label: "Revisión", icon: ClipboardCheck },
     { href: "/dashboard/settings", label: "Ajustes", icon: Settings },
+    { href: "/dashboard/privacy", label: "Privacidad", icon: ShieldCheck },
 ];
 
 export default function DashboardShell({ children }: { children: ReactNode }) {

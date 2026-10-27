@@ -23,7 +23,9 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
     headers.set("X-User-Timestamp", timestamp);
     headers.set("X-User-Signature", signature);
     // El token de Gmail solo viaja al backend cuando este necesita leer el buzón.
-    if (path[0] === "sincronizar" && refreshToken) headers.set("X-Gmail-Refresh-Token", refreshToken);
+    if ((path[0] === "sincronizar" || path.join("/") === "privacidad/gmail/conectar" || path.join("/") === "privacidad/gmail/desconectar") && refreshToken) headers.set("X-Gmail-Refresh-Token", refreshToken);
+    const idempotencyKey = request.headers.get("idempotency-key");
+    if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey);
     const contentType = request.headers.get("content-type");
     if (contentType) headers.set("content-type", contentType);
 
